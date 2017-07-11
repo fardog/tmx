@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="48" height="30" tilewidth="16" tileheight="16" nextobjectid="92">
+ <tileset firstgid="1" name="temp" tilewidth="16" tileheight="16" tilecount="256" columns="16">
+  <image source="../../../../../../../Projects/cellar/android/assets/tileSet.png" width="256" height="256"/>
+ </tileset>
+ <layer name="walls" width="48" height="30">
+  <data encoding="base64" compression="zlib">
+   eJztltENgCAMBRnVUZwAV3AURxOjfJggvEJLG9NL+uELtCeJkS2EEJ9a79pTHamW69ka2RXNrfF3/1pRZiBZy5HiwnH+SH+uGWhO6Yn6c8xCc7Rfj//IPDRHeo34985Ec6SXVf9W7x4X6p6Sk5Q/ihX/Gbi/Lu6vi/vr4v66cPrX7jDI/7Rnv/T9YRTt+88o7v/OY2PdbEpO6Pl/rZEu9H2o/hZwf12Q71fqv8TZL3MC3e65pA==
+  </data>
+ </layer>
+ <layer name="non-solid" width="48" height="30" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJzt0TEKADAIA0D/P/TNzh3qJNjSO8hoCBixW0VOqpvuPv7w+t/tn2U/AAAAwB0S5c0aoQ==
+  </data>
+ </layer>
+ <objectgroup name="obstacles">
+  <object id="74" type="ground" x="176" y="400">
+   <polygon points="0,0 416,0 416,16 0,16"/>
+  </object>
+  <object id="75" type="ground" x="272" y="464">
+   <polygon points="0,0 224,0 224,16 0,16"/>
+  </object>
+  <object id="76" type="wall" x="48" y="0" width="16" height="464"/>
+  <object id="77" type="ground" x="48" y="464" width="128" height="16"/>
+  <object id="78" type="ground" x="64" y="384" width="16" height="16"/>
+  <object id="79" type="ground" x="96" y="384" width="32" height="16"/>
+  <object id="81" type="wall" x="112" y="144" width="16" height="240"/>
+  <object id="82" type="ground" x="64" y="48" width="112" height="16"/>
+  <object id="83" type="ground" x="592" y="48" width="112" height="16"/>
+  <object id="84" type="wall" x="704" y="0" width="16" height="464"/>
+  <object id="85" type="ground" x="592" y="464" width="128" height="16"/>
+  <object id="86" type="wall" x="640" y="144" width="16" height="240"/>
+  <object id="87" type="ground" x="640" y="384" width="32" height="16"/>
+  <object id="88" type="ground" x="688" y="384" width="16" height="16"/>
+  <object id="89" type="ground" x="432" y="320" width="160" height="16"/>
+  <object id="90" type="ground" x="176" y="320" width="160" height="16"/>
+ </objectgroup>
+ <objectgroup name="players">
+  <object id="91" name="player1" type="player" x="80" y="432" width="16" height="16"/>
+ </objectgroup>
+</map>
