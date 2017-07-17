@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="48" height="30" tilewidth="16" tileheight="16" nextobjectid="92">
- <tileset firstgid="1" name="temp" tilewidth="16" tileheight="16" tilecount="256" columns="16">
+<map version="1.0" tiledversion="1.0.2" orientation="orthogonal" renderorder="right-down" width="48" height="30" tilewidth="16" tileheight="16" nextobjectid="93">
+ <tileset firstgid="1" name="temp" tilewidth="16" tileheight="16" tilecount="0" columns="16">
   <image source="../../../../../../../Projects/cellar/android/assets/tileSet.png" width="256" height="256"/>
  </tileset>
  <layer name="walls" width="48" height="30">
@@ -34,6 +34,17 @@
   <object id="88" type="ground" x="688" y="384" width="16" height="16"/>
   <object id="89" type="ground" x="432" y="320" width="160" height="16"/>
   <object id="90" type="ground" x="176" y="320" width="160" height="16"/>
+ </objectgroup>
+ <objectgroup name="enemies">
+  <object id="92" name="enemy1" type="enemy" x="320" y="240" width="16" height="16">
+   <properties>
+    <property name="cool" type="bool" value="true"/>
+    <property name="food" value="pizza"/>
+    <property name="health" type="int" value="100"/>
+    <property name="velX" type="float" value="1.1"/>
+    <property name="velY" type="float" value="1.1"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup name="players">
   <object id="91" name="player1" type="player" x="80" y="432" width="16" height="16"/>

@@ -25,9 +25,12 @@ const (
 
 // Possible Errors
 var (
-	ErrUnsupportedEncoding    = errors.New("invalid encoding")
-	ErrUnsupportedCompression = errors.New("unsupported compression type")
-	ErrNoSuitableTileSet      = errors.New("no suitable tileset found for tiles")
+	ErrUnsupportedEncoding      = errors.New("invalid encoding")
+	ErrUnsupportedCompression   = errors.New("unsupported compression type")
+	ErrNoSuitableTileSet        = errors.New("no suitable tileset found for tiles")
+	ErrPropertyNotFound         = errors.New("no property with a given name was found")
+	ErrPropertyWrongType        = errors.New("a property was found, but its type was incorrect")
+	ErrPropertyFailedConversion = errors.New("the property failed to convert to the expected type")
 )
 
 // ObjectID specifies a unique ID
@@ -84,7 +87,7 @@ type Map struct {
 	BackgroundColor string        `xml:"backgroundcolor,attr"`
 	NextObjectID    ObjectID      `xml:"nextobjectid,attr"`
 	TileSets        []TileSet     `xml:"tileset"`
-	Properties      []Property    `xml:"properties>property"`
+	Properties      Properties    `xml:"properties>property"`
 	Layers          []Layer       `xml:"layer"`
 	ObjectGroups    []ObjectGroup `xml:"objectgroup"`
 	ImageLayers     []ImageLayer  `xml:"imagelayer"`
@@ -138,7 +141,7 @@ type TileSet struct {
 	Margin        int        `xml:"margin,attr"`
 	TileCount     int        `xml:"tilecount,attr"`
 	Columns       int        `xml:"columns,attr"`
-	Properties    []Property `xml:"properties>property"`
+	Properties    Properties `xml:"properties>property"`
 	TileOffset    TileOffset `xml:"tileoffset"`
 	Image         Image      `xml:"image"`
 	TerrainTypes  []Terrain  `xml:"terraintypes>terrain"`
@@ -188,7 +191,7 @@ type Image struct {
 type Terrain struct {
 	Name       string     `xml:"name,attr"`
 	TileID     TileID     `xml:"tile,attr"`
-	Properties []Property `xml:"properties>property"`
+	Properties Properties `xml:"properties>property"`
 }
 
 // Tile represents an individual tile within a TileSet
@@ -196,7 +199,7 @@ type Tile struct {
 	TileID         TileID      `xml:"id,attr"`
 	RawTerrainType string      `xml:"terrain,attr"`
 	Probability    float32     `xml:"probability,attr"`
-	Properties     []Property  `xml:"properties>property"`
+	Properties     Properties  `xml:"properties>property"`
 	Image          Image       `xml:"image"`
 	Animation      []Frame     `xml:"animation>frame"`
 	ObjectGroup    ObjectGroup `xml:"objectgroup"`
@@ -271,7 +274,7 @@ type Layer struct {
 	Visible    bool       `xml:"visible,attr"`
 	OffsetX    int        `xml:"offsetx,attr"`
 	OffsetY    int        `xml:"offsety,attr"`
-	Properties []Property `xml:"properties>property"`
+	Properties Properties `xml:"properties>property"`
 	RawData    Data       `xml:"data"`
 
 	// cache values
@@ -473,8 +476,8 @@ type ObjectGroup struct {
 	OffsetX    int        `xml:"offsetx,attr"`
 	OffsetY    int        `xml:"offsety,attr"`
 	DrawOrder  string     `xml:"draworder,attr"`
-	Properties []Property `xml:"properties>property"`
-	Objects    []Object   `xml:"object"`
+	Properties Properties `xml:"properties>property"`
+	Objects    Objects    `xml:"object"`
 }
 
 // Object is an individual object, such as a Polygon, Polyline, or otherwise.
@@ -489,11 +492,25 @@ type Object struct {
 	Rotation   int        `xml:"rotation,attr"`
 	GlobalID   GlobalID   `xml:"gid,attr"`
 	Visible    bool       `xml:"visible,attr"`
-	Properties []Property `xml:"properties>property"`
+	Properties Properties `xml:"properties>property"`
 	Polygons   []Poly     `xml:"polygon"`
 	Polylines  []Poly     `xml:"polyline"`
 	Image      Image      `xml:"image"`
 	RawExtra   []Tag      `xml:",any"`
+}
+
+// Objects is an array of Object
+type Objects []Object
+
+// WithName retrieves the first object with a given name, nil if none
+func (ol Objects) WithName(name string) *Object {
+	for _, o := range ol {
+		if o.Name == name {
+			return &o
+		}
+	}
+
+	return nil
 }
 
 // Ellipse returns true if the object is an ellipse, else false
@@ -560,7 +577,7 @@ type ImageLayer struct {
 	Height     int        `xml:"height,attr"`
 	Opacity    float32    `xml:"opacity,attr"`
 	Visible    bool       `xml:"visible,attr"`
-	Properties []Property `xml:"properties>property"`
+	Properties Properties `xml:"properties>property"`
 	Image      Image      `xml:"image"`
 }
 
@@ -570,6 +587,69 @@ type Property struct {
 	Name  string `xml:"name,attr"`
 	Type  string `xml:"type,attr"`
 	Value string `xml:"value,attr"`
+}
+
+// Properties is an array of Property objects
+type Properties []Property
+
+// WithName returns the first property in a list with a given name, nil if none
+func (pl Properties) WithName(name string) *Property {
+	for _, p := range pl {
+		if p.Name == name {
+			return &p
+		}
+	}
+
+	return nil
+}
+
+// Float returns a value from a given float property
+func (pl Properties) Float(name string) (v float64, err error) {
+	p := pl.WithName(name)
+	if p == nil {
+		return v, ErrPropertyNotFound
+	}
+
+	if p.Type != "float" {
+		return v, ErrPropertyWrongType
+	}
+
+	if v, err = strconv.ParseFloat(p.Value, 64); err != nil {
+		return v, ErrPropertyFailedConversion
+	}
+
+	return
+}
+
+// Int returns a value from a given integer property
+func (pl Properties) Int(name string) (v int64, err error) {
+	p := pl.WithName(name)
+	if p == nil {
+		return v, ErrPropertyNotFound
+	}
+
+	if p.Type != "int" {
+		return v, ErrPropertyWrongType
+	}
+
+	if v, err = strconv.ParseInt(p.Value, 10, 64); err != nil {
+		return v, ErrPropertyFailedConversion
+	}
+
+	return
+}
+
+func (pl Properties) Bool(name string) (v bool, err error) {
+	p := pl.WithName(name)
+	if p == nil {
+		return v, ErrPropertyNotFound
+	}
+
+	if p.Type != "bool" {
+		return v, ErrPropertyWrongType
+	}
+
+	return p.Value == "true", nil
 }
 
 // Tag represents a bare XML tag; it is used to decode some not-attribute-nor-

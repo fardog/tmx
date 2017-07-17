@@ -7,7 +7,7 @@ import (
 )
 
 func TestDecoder(t *testing.T) {
-	file, err := os.Open(path.Join("fixtures", "1-1.tmx"))
+	file, err := os.Open(path.Join("fixtures", "test.tmx"))
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -99,5 +99,37 @@ func TestDecoder(t *testing.T) {
 	if ts := m.TileSetWithName("temp"); ts != nil {
 	} else {
 		t.Error("expected tileset with name `temp`, but found none.")
+	}
+
+	if enemies := m.ObjectGroupWithName("enemies"); enemies != nil {
+		if enemy := enemies.Objects.WithName("enemy1"); enemy != nil {
+			if cool, err := enemy.Properties.Bool("cool"); err != nil {
+				t.Errorf("unexpected error getting property `cool`")
+			} else if cool != true {
+				t.Errorf("expected property `cool` to be true")
+			}
+
+			if velX, err := enemy.Properties.Float("velX"); err != nil {
+				t.Errorf("unexpected error getting property `velX`")
+			} else if velX != 1.1 {
+				t.Errorf("expected property `velX` to have value `1.1`")
+			}
+
+			if health, err := enemy.Properties.Int("health"); err != nil {
+				t.Errorf("unexpected error getting property `health`")
+			} else if health != 100 {
+				t.Errorf("expected property `health` to have value `100`")
+			}
+
+			if food := enemy.Properties.WithName("food"); food == nil {
+				t.Error("expected to find property named food, found none.")
+			} else if food.Value != "pizza" {
+				t.Error("expected property `food` to have value `pizza`")
+			}
+		} else {
+			t.Errorf("expected object with name `enemy1`, but found none.")
+		}
+	} else {
+		t.Error("expected objectgroup with name `enemies`, but found none.")
 	}
 }
