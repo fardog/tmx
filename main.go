@@ -1,3 +1,5 @@
+// Package tmx implements a parser for the TMX file format used in the
+// Tiled Map Editor.
 package tmx
 
 import (
@@ -196,13 +198,16 @@ type Terrain struct {
 
 // Tile represents an individual tile within a TileSet
 type Tile struct {
-	TileID         TileID      `xml:"id,attr"`
-	RawTerrainType string      `xml:"terrain,attr"`
-	Probability    float32     `xml:"probability,attr"`
-	Properties     Properties  `xml:"properties>property"`
-	Image          Image       `xml:"image"`
-	Animation      []Frame     `xml:"animation>frame"`
-	ObjectGroup    ObjectGroup `xml:"objectgroup"`
+	TileID      TileID      `xml:"id,attr"`
+	Probability float32     `xml:"probability,attr"`
+	Properties  Properties  `xml:"properties>property"`
+	Image       Image       `xml:"image"`
+	Animation   []Frame     `xml:"animation>frame"`
+	ObjectGroup ObjectGroup `xml:"objectgroup"`
+
+	// Raw TerrainType loaded from XML. Not intended to be used directly; use
+	// the methods on this struct to accessed parsed data.
+	RawTerrainType string `xml:"terrain,attr"`
 
 	// cache values
 	terrainType *TerrainType
@@ -275,7 +280,10 @@ type Layer struct {
 	OffsetX    int        `xml:"offsetx,attr"`
 	OffsetY    int        `xml:"offsety,attr"`
 	Properties Properties `xml:"properties>property"`
-	RawData    Data       `xml:"data"`
+
+	// Raw Data loaded from XML. Not intended to be used directly; use the
+	// methods on this struct to accessed parsed data.
+	RawData Data `xml:"data"`
 
 	// cache values
 	tileGlobalRefs []TileGlobalRef
@@ -391,7 +399,10 @@ type Data struct {
 	Encoding       string          `xml:"encoding,attr"`
 	Compression    string          `xml:"compression,attr"`
 	TileGlobalRefs []TileGlobalRef `xml:"tile"`
-	RawBytes       []byte          `xml:",innerxml"`
+
+	// Raw Data loaded from XML. Not intended to be used directly; use the
+	// methods on this struct to accessed parsed data.
+	RawBytes []byte `xml:",innerxml"`
 }
 
 func (d *Data) decodeB64Data() (data []byte, err error) {
@@ -496,7 +507,10 @@ type Object struct {
 	Polygons   []Poly     `xml:"polygon"`
 	Polylines  []Poly     `xml:"polyline"`
 	Image      Image      `xml:"image"`
-	RawExtra   []Tag      `xml:",any"`
+
+	// Raw Extras loaded from XML. Not intended to be used directly; use the
+	// methods on this struct to accessed parsed data.
+	RawExtra []Tag `xml:",any"`
 }
 
 // Objects is an array of Object
@@ -526,6 +540,8 @@ func (o *Object) Ellipse() bool {
 // Poly represents a collection of points; used to represent a Polyline or
 // a polygon
 type Poly struct {
+	// Raw Points loaded from XML. Not intended to be used directly; use the
+	// methods on this struct to accessed parsed data.
 	RawPoints string `xml:"points,attr"`
 }
 
@@ -639,6 +655,7 @@ func (pl Properties) Int(name string) (v int64, err error) {
 	return
 }
 
+// Bool returns a value from a given boolean property
 func (pl Properties) Bool(name string) (v bool, err error) {
 	p := pl.WithName(name)
 	if p == nil {
