@@ -496,10 +496,10 @@ type Object struct {
 	ObjectID   ObjectID   `xml:"id,attr"`
 	Name       string     `xml:"name,attr"`
 	Type       string     `xml:"type,attr"`
-	X          int        `xml:"x,attr"`
-	Y          int        `xml:"y,attr"`
-	Width      int        `xml:"width,attr"`
-	Height     int        `xml:"height,attr"`
+	X          float64    `xml:"x,attr"`
+	Y          float64    `xml:"y,attr"`
+	Width      float64    `xml:"width,attr"`
+	Height     float64    `xml:"height,attr"`
 	Rotation   int        `xml:"rotation,attr"`
 	GlobalID   GlobalID   `xml:"gid,attr"`
 	Visible    bool       `xml:"visible,attr"`
@@ -687,4 +687,16 @@ func Decode(r io.Reader) (*Map, error) {
 	}
 
 	return m, nil
+}
+
+// Same as Decode, but for TSX files
+func DecodeTileset(r io.Reader) (*TileSet, error) {
+	d := xml.NewDecoder(r)
+	ts := new(TileSet)
+
+	if err := d.Decode(ts); err != nil {
+		return nil, err
+	}
+
+	return ts, nil
 }
