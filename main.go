@@ -76,23 +76,32 @@ type TileID uint32
 
 // Map represents a Tiled map, and is the top-level container for the map data
 type Map struct {
-	Version         string        `xml:"version,attr"`
-	Orientation     string        `xml:"orientation,attr"`
-	RenderOrder     string        `xml:"renderorder,attr"`
-	Width           int           `xml:"width,attr"`
-	Height          int           `xml:"height,attr"`
-	TileWidth       int           `xml:"tilewidth,attr"`
-	TileHeight      int           `xml:"tileheight,attr"`
-	HexSideLength   int           `xml:"hexsidelength,attr"`
-	StaggerAxis     rune          `xml:"staggeraxis,attr"`
-	StaggerIndex    string        `xml:"staggerindex,attr"`
-	BackgroundColor string        `xml:"backgroundcolor,attr"`
-	NextObjectID    ObjectID      `xml:"nextobjectid,attr"`
-	TileSets        []TileSet     `xml:"tileset"`
-	Properties      Properties    `xml:"properties>property"`
-	Layers          []Layer       `xml:"layer"`
-	ObjectGroups    []ObjectGroup `xml:"objectgroup"`
-	ImageLayers     []ImageLayer  `xml:"imagelayer"`
+	Version         string         `xml:"version,attr"`
+	Orientation     string         `xml:"orientation,attr"`
+	RenderOrder     string         `xml:"renderorder,attr"`
+	Width           int            `xml:"width,attr"`
+	Height          int            `xml:"height,attr"`
+	TileWidth       int            `xml:"tilewidth,attr"`
+	TileHeight      int            `xml:"tileheight,attr"`
+	HexSideLength   int            `xml:"hexsidelength,attr"`
+	StaggerAxis     rune           `xml:"staggeraxis,attr"`
+	StaggerIndex    string         `xml:"staggerindex,attr"`
+	BackgroundColor string         `xml:"backgroundcolor,attr"`
+	NextObjectID    ObjectID       `xml:"nextobjectid,attr"`
+	TileSets        []TileSet      `xml:"tileset"`
+	Properties      Properties     `xml:"properties>property"`
+	Layers          []Layer        `xml:"-"`
+	ObjectGroups    []ObjectGroup  `xml:"-"`
+	ImageLayers     []ImageLayer   `xml:"-"`
+	LayersAndGroups []LayerOrGroup `xml:",any"`
+}
+
+// This is a temporary structure we parse from XML to determine relative order
+// of layers and object groups.
+type LayerOrGroup struct {
+	XMLName  xml.Name
+	InnerXML []byte     `xml:",innerxml"`
+	Attrs    []xml.Attr `xml:",any,attr"`
 }
 
 // LayerWithName retrieves the first Layer matching the provided name. Returns
@@ -273,6 +282,7 @@ type Layer struct {
 	Name       string     `xml:"name,attr"`
 	X          int        `xml:"x,attr"`
 	Y          int        `xml:"y,attr"`
+	Z          int        `xml:"-"`
 	Width      int        `xml:"width,attr"`
 	Height     int        `xml:"height,attr"`
 	Opacity    float32    `xml:"opacity,attr"`
@@ -480,6 +490,7 @@ type ObjectGroup struct {
 	Color      string     `xml:"color,attr"`
 	X          int        `xml:"x,attr"`
 	Y          int        `xml:"y,attr"`
+	Z          int        `xml:"-"`
 	Width      int        `xml:"width,attr"`
 	Height     int        `xml:"height,attr"`
 	Opacity    float32    `xml:"opacity,attr"`
@@ -589,6 +600,7 @@ type ImageLayer struct {
 	OffsetY    int        `xml:"offsety,attr"`
 	X          int        `xml:"x,attr"`
 	Y          int        `xml:"y,attr"`
+	Z          int        `xml:"-"`
 	Width      int        `xml:"width,attr"`
 	Height     int        `xml:"height,attr"`
 	Opacity    float32    `xml:"opacity,attr"`
@@ -684,6 +696,35 @@ func Decode(r io.Reader) (*Map, error) {
 
 	if err := d.Decode(m); err != nil {
 		return nil, err
+	}
+
+	// Parsing layers.
+	z := 0
+	for _, layerOrGroup := range m.LayersAndGroups {
+		data, err := xml.Marshal(layerOrGroup)
+		if err != nil {
+			return nil, err
+		}
+		switch layerOrGroup.XMLName.Local {
+		case "layer":
+			layer := new(Layer)
+			xml.Unmarshal(data, layer)
+			layer.Z = z
+			m.Layers = append(m.Layers, *layer)
+			z++
+		case "objectgroup":
+			objectGroup := new(ObjectGroup)
+			xml.Unmarshal(data, objectGroup)
+			objectGroup.Z = z
+			m.ObjectGroups = append(m.ObjectGroups, *objectGroup)
+			z++
+		case "imagelayer":
+			imageLayer := new(ImageLayer)
+			xml.Unmarshal(data, imageLayer)
+			imageLayer.Z = z
+			m.ImageLayers = append(m.ImageLayers, *imageLayer)
+			z++
+		}
 	}
 
 	return m, nil
