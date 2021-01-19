@@ -134,20 +134,21 @@ func (m *Map) TileSetWithName(name string) *TileSet {
 // TileSet is a set of tiles, including the graphics data to be mapped to the
 // tiles, and the actual arrangement of tiles.
 type TileSet struct {
-	FirstGlobalID GlobalID   `xml:"firstgid,attr"`
-	Source        string     `xml:"source,attr"`
-	Name          string     `xml:"name,attr"`
-	TileWidth     int        `xml:"tilewidth,attr"`
-	TileHeight    int        `xml:"tileheight,attr"`
-	Spacing       int        `xml:"spacing,attr"`
-	Margin        int        `xml:"margin,attr"`
-	TileCount     int        `xml:"tilecount,attr"`
-	Columns       int        `xml:"columns,attr"`
-	Properties    Properties `xml:"properties>property"`
-	TileOffset    TileOffset `xml:"tileoffset"`
-	Image         Image      `xml:"image"`
-	TerrainTypes  []Terrain  `xml:"terraintypes>terrain"`
-	Tiles         []Tile     `xml:"tile"`
+	FirstGlobalID   GlobalID   `xml:"firstgid,attr"`
+	Source          string     `xml:"source,attr"`
+	Name            string     `xml:"name,attr"`
+	TileWidth       int        `xml:"tilewidth,attr"`
+	TileHeight      int        `xml:"tileheight,attr"`
+	Spacing         int        `xml:"spacing,attr"`
+	Margin          int        `xml:"margin,attr"`
+	TileCount       int        `xml:"tilecount,attr"`
+	Columns         int        `xml:"columns,attr"`
+	Properties      Properties `xml:"properties>property"`
+	TileOffset      TileOffset `xml:"tileoffset"`
+	ObjectAlignment string     `xml:"objectalignment"`
+	Image           Image      `xml:"image"`
+	TerrainTypes    []Terrain  `xml:"terraintypes>terrain"`
+	Tiles           []Tile     `xml:"tile"`
 }
 
 // TileWithID returns a pointer to the Tile with a given TileID; nil if one is
@@ -201,6 +202,7 @@ type Tile struct {
 	TileID      TileID      `xml:"id,attr"`
 	Probability float32     `xml:"probability,attr"`
 	Properties  Properties  `xml:"properties>property"`
+	Type        string      `xml:"type"`
 	Image       Image       `xml:"image"`
 	Animation   []Frame     `xml:"animation>frame"`
 	ObjectGroup ObjectGroup `xml:"objectgroup"`
