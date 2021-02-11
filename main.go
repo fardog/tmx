@@ -145,7 +145,7 @@ type TileSet struct {
 	Columns         int        `xml:"columns,attr"`
 	Properties      Properties `xml:"properties>property"`
 	TileOffset      TileOffset `xml:"tileoffset"`
-	ObjectAlignment string     `xml:"objectalignment"`
+	ObjectAlignment string     `xml:"objectalignment,attr"`
 	Image           Image      `xml:"image"`
 	TerrainTypes    []Terrain  `xml:"terraintypes>terrain"`
 	Tiles           []Tile     `xml:"tile"`
@@ -202,7 +202,7 @@ type Tile struct {
 	TileID      TileID      `xml:"id,attr"`
 	Probability float32     `xml:"probability,attr"`
 	Properties  Properties  `xml:"properties>property"`
-	Type        string      `xml:"type"`
+	Type        string      `xml:"type,attr"`
 	Image       Image       `xml:"image"`
 	Animation   []Frame     `xml:"animation>frame"`
 	ObjectGroup ObjectGroup `xml:"objectgroup"`
