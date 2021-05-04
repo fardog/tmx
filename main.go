@@ -361,12 +361,13 @@ func (l *Layer) TileDefs(tss []TileSet) (tds []*TileDef, err error) {
 		}
 
 		var ts *TileSet
-		for _, t := range tss {
+		for i := range tss {
+			t := &tss[i]
 			if bid < uint32(t.FirstGlobalID) {
 				break
 			}
 
-			ts = &t
+			ts = t
 		}
 
 		// if we never found a tileset, the file is invalid; return an error that
